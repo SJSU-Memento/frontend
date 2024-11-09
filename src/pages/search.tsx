@@ -1,35 +1,79 @@
-import { useState } from "react"
-import { Search, ChevronDown, ChevronUp, MapPin } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
-import DateRangeSelector from "@/components/m/date-range-selector"
-import { DateRange } from "react-day-picker"
+import { useState } from "react";
+import { Search, ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import DateRangeSelector from "@/components/m/date-range-selector";
+import { DateRange } from "react-day-picker";
+import { addDays } from "date-fns";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { MapSelectorComponent } from "@/components/map-selector";
+import FilterSection from "@/components/FilterSection";
 
-import { addDays } from "date-fns"
+export default function SearchPage() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [query, setQuery] = useState('');
 
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-
-export default function Component() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [filterByDate, setFilterByDate] = useState(false);
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 7),
-  })
-  const [mapCenter, setMapCenter] = useState({ lat: 0, lng: 0 })
+  });
+
+  const [filterByLocation, setFilterByLocation] = useState(false);
+  const [locationFilter, setLocationFilter] = useState({
+    long: -121.88286505229732,
+    lat: 37.33329157948267,
+    radius: 10,
+  });
+
+  const [memories, setMemories] = useState<{
+    id: number;
+    image_path: string;
+  }[]>([]);
+
+  const handleSearch = async () => {
+    const paramObject: {
+      query: string;
+
+      // date filter
+      to?: string;
+      from?: string;
+
+      // location filter
+      lat?: string;
+      long?: string;
+      radius?: string;
+    } = { query };
+
+    if (filterByDate && date?.from && date?.to) {
+      paramObject.from = date.from.toISOString();
+      paramObject.to = date.to.toISOString();
+    }
+
+    if (locationFilter) {
+      paramObject.lat = `${locationFilter.lat}`;
+      paramObject.long = `${locationFilter.long}`;
+      paramObject.radius = `${locationFilter.radius}`;
+    }
+
+    const params = new URLSearchParams(paramObject);
+    const request = await fetch(`/api/memory?${params}`);
+    const data = await request.json();
+    setMemories(data.memories);
+  };
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-4 space-y-4">
+    <div className="w-full p-4 space-y-4">
       <h1 className="text-2xl font-bold">Search Memories</h1>
-      
+
       <div className="flex space-x-2">
-        <Input placeholder="Search your memories..." className="flex-grow" />
-        <Button type="submit">
+        <Input
+          placeholder="Search your memories..."
+          className="flex-grow"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <Button type="submit" onClick={handleSearch}>
           <Search className="h-4 w-4 mr-2" />
           Search
         </Button>
@@ -43,43 +87,35 @@ export default function Component() {
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-4 mt-4">
-          <div className="space-y-2">
-            <Label>Date Range</Label>
-            <DateRangeSelector date={date} setDate={setDate} />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Location</Label>
-            <div className="border rounded-md p-4 bg-gray-100 relative">
-              <div className="aspect-video bg-gray-200 rounded-md flex items-center justify-center">
-                Map Placeholder
-                <MapPin className="h-8 w-8 text-primary absolute" style={{
-                  left: `${(mapCenter.lng + 180) / 360 * 100}%`,
-                  top: `${(90 - mapCenter.lat) / 180 * 100}%`,
-                }} />
-              </div>
-              <div className="mt-2 space-y-2">
-                <Label>Latitude</Label>
-                <Slider
-                  min={-90}
-                  max={90}
-                  step={0.1}
-                  value={[mapCenter.lat]}
-                  onValueChange={([lat]) => setMapCenter(prev => ({ ...prev, lat }))}
-                />
-                <Label>Longitude</Label>
-                <Slider
-                  min={-180}
-                  max={180}
-                  step={0.1}
-                  value={[mapCenter.lng]}
-                  onValueChange={([lng]) => setMapCenter(prev => ({ ...prev, lng }))}
-                />
-              </div>
-            </div>
-          </div>
+          <FilterSection
+            label="Date Range"
+            filterBy={filterByDate}
+            setFilterBy={setFilterByDate}
+            content={<DateRangeSelector date={date} setDate={setDate} />}
+          />
+          <FilterSection
+            className="space-y-2"
+            label="Location"
+            filterBy={filterByLocation}
+            setFilterBy={setFilterByLocation}
+            content={
+              <MapSelectorComponent
+                onChange={(center) => setLocationFilter(center)}
+                initialPosition={locationFilter}
+                initialRadius={locationFilter.radius}
+              />
+            }
+          />
         </CollapsibleContent>
       </Collapsible>
+
+      <div className="grid gap-4">
+        {memories.map((memory) => (
+          <div key={memory.id} className="border rounded-md p-4 bg-gray-100">
+            <img src={`/storage/${memory.image_path}`} className="w-full h-48 object-cover rounded-md" />
+          </div>
+        ))}
+      </div>
     </div>
-  )
+  );
 }

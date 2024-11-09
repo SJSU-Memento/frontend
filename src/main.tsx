@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import SearchPage from './pages/search.tsx'
+import ManualPage from './pages/manual.tsx'
 import './index.css'
 
 import {
@@ -13,6 +14,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <SearchPage />,
+  },
+  {
+    path: "/manual",
+    element: <ManualPage />,
   },
 ]);
 

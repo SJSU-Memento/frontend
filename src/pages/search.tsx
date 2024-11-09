@@ -36,8 +36,8 @@ export default function SearchPage() {
       query: string;
 
       // date filter
-      to?: string;
-      from?: string;
+      start?: string;
+      end?: string;
 
       // location filter
       lat?: string;
@@ -46,11 +46,11 @@ export default function SearchPage() {
     } = { query };
 
     if (filterByDate && date?.from && date?.to) {
-      paramObject.from = date.from.toISOString();
-      paramObject.to = date.to.toISOString();
+      paramObject.start = date.from.toISOString();
+      paramObject.end = date.to.toISOString();
     }
 
-    if (locationFilter) {
+    if (filterByLocation && locationFilter) {
       paramObject.lat = `${locationFilter.lat}`;
       paramObject.long = `${locationFilter.long}`;
       paramObject.radius = `${locationFilter.radius}`;

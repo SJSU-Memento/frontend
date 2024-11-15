@@ -115,7 +115,7 @@ export default function SearchPage() {
       <div className="grid gap-4">
         {memories.map((memory) => (
           <div key={memory.id} className="border rounded-md p-4 bg-gray-100" onClick={() => {
-            navigate(`/timeline/?timestamp=${memory.timestamp}`);
+            navigate(`/timeline/?timestamp=${encodeURIComponent(memory.timestamp)}`);
           }}>
             <img src={memory.image_path} className="w-full h-48 object-cover rounded-md" />
           </div>

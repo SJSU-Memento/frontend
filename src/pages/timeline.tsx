@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState, useMemo, useRef } from "react"
+import { useEffect, useState, useMemo } from "react"
 
 import { MediaCarouselComponent, MediaItem } from "@/components/media-carousel"
 import { useSearchParams } from "react-router-dom"
 
 const fetchTimeline = async (timestamp: string, direction: 'before' | 'after' | 'both') => {
-  const request = await fetch(`/api/memory/timeline?timestamp=${timestamp}&direction=${direction}`)
+  const request = await fetch(`/api/memory/timeline?timestamp=${encodeURIComponent(timestamp)}&direction=${direction}`)
   const data = await request.json()
 
   return data.memories

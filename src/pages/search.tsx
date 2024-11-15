@@ -8,8 +8,10 @@ import { addDays } from "date-fns";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { MapSelectorComponent } from "@/components/map-selector";
 import FilterSection from "@/components/FilterSection";
+import { useNavigate } from "react-router-dom";
 
 export default function SearchPage() {
+  const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
 
@@ -29,6 +31,7 @@ export default function SearchPage() {
   const [memories, setMemories] = useState<{
     id: number;
     image_path: string;
+    timestamp: string;
   }[]>([]);
 
   const handleSearch = async () => {
@@ -57,7 +60,7 @@ export default function SearchPage() {
     }
 
     const params = new URLSearchParams(paramObject);
-    const request = await fetch(`/api/memory?${params}`);
+    const request = await fetch(`/api/memory/?${params}`);
     const data = await request.json();
     setMemories(data.memories);
   };
@@ -111,8 +114,10 @@ export default function SearchPage() {
 
       <div className="grid gap-4">
         {memories.map((memory) => (
-          <div key={memory.id} className="border rounded-md p-4 bg-gray-100">
-            <img src={`/storage/${memory.image_path}`} className="w-full h-48 object-cover rounded-md" />
+          <div key={memory.id} className="border rounded-md p-4 bg-gray-100" onClick={() => {
+            navigate(`/timeline/?timestamp=${memory.timestamp}`);
+          }}>
+            <img src={memory.image_path} className="w-full h-48 object-cover rounded-md" />
           </div>
         ))}
       </div>

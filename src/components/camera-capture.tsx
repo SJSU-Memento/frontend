@@ -147,26 +147,26 @@ export function CameraCaptureComponent() {
 
         // Get current local time
         const currentTime = new Date().toISOString()
-
-        // Prepare data for upload
-        const formData = new FormData()
-        formData.append('image', imageDataUrl)
-        formData.append('timestamp', currentTime)
-
-        // const locationData = geoLocation.current ? `${geoLocation.current.coords.latitude},${geoLocation.current.coords.longitude}` : ''
         const locationData = geoLocation ? `${geoLocation.coords.latitude},${geoLocation.coords.longitude}` : ''
 
-        formData.append('location', locationData)
+        const payload = {
+          image: imageDataUrl,
+          timestamp: currentTime,
+          location: locationData
+        }
 
 
 
-        console.log("Uploading image", formData)
+        console.log("Uploading image", payload)
 
         // Upload to server
         try {
           const response = await fetch('/api/upload/', {
             method: 'POST',
-            body: formData
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
           })
           if (response.ok) {
             toast({
@@ -200,8 +200,31 @@ export function CameraCaptureComponent() {
         variant: "destructive",
       })
     }
-  }, [cameras, currentCameraIndex, toast])
+  }, [toast, geoLocation, videoRef, canvasRef])
 
+  const [isCapturing, setIsCapturing] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (isCapturing) {
+      intervalRef.current = setInterval(captureImage, 5000);
+    } else {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isCapturing, captureImage, geoLocation]);
+
+  const handleStartStopCapture = () => {
+    setIsCapturing(!isCapturing);
+  };
   return (
     // <Card className="w-full max-w-md mx-auto">
     <Card className="w-full">
@@ -229,8 +252,8 @@ export function CameraCaptureComponent() {
         </div>
         {geoLocation ? `${geoLocation.coords.latitude},${geoLocation.coords.longitude}` : 'No location'}
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <div className="flex gap-2">
+      <CardFooter className="flex justify-between flex-col gap-2">
+        <div className="flex gap-2 justify-between">
           <Button onClick={startCamera} disabled={isStreaming}>
             {isStreaming ? "Camera Active" : "Start Camera"}
           </Button>
@@ -244,6 +267,9 @@ export function CameraCaptureComponent() {
         </div>
         <Button onClick={captureImage} disabled={!isStreaming}>
           <Camera className="mr-2 h-4 w-4" /> Capture and Upload
+        </Button>
+        <Button onClick={handleStartStopCapture}>
+          {isCapturing ? 'Stop Capture' : 'Start Capture'}
         </Button>
       </CardFooter>
     </Card>

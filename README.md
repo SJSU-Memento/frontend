@@ -11,9 +11,20 @@ npm install
 npm run dev
 ```
 
-### Adding Missing Shadcn UI Components
+## Deployment
 
-https://ui.shadcn.com/
+To deploy the Memento frontend, follow these steps:
+
+```bash
+npm run build
+npm run start
+```
+
+### Shadcn UI Components
+
+To add new base components, visit https://ui.shadcn.com/.
+
+Use the following command to add a new component:
 
 ```
 npx shadcn@latest add <component-name>

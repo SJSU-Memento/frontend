@@ -11,6 +11,21 @@ npm install
 npm run dev
 ```
 
+### Development Inside Docker
+
+To develop the Memento frontend inside a Docker container, follow these steps:
+
+```bash
+docker run --rm -it \
+  -v ${PWD}:/app \
+  -p 5173:5173 \
+  -w /app \
+  -e NODE_ENV=development \
+  -e VITE_HOST=0.0.0.0 \
+  node:20-alpine \
+  sh -c "npm install && npm run dev"
+```
+
 ## Deployment
 
 To deploy the Memento frontend, follow these steps:

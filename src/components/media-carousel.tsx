@@ -34,22 +34,11 @@ export function MediaCarouselComponent({ items = [], value, onChange }: {
           setIsPlaying(false);
           return;
         }
-        // console.log('valueRef.current', valueRef.current)
         onChange(items[valueRef.current + 1].timestamp);
       }, 250);
     }
     return () => clearInterval(interval);
   }, [isPlaying, items, onChange]);
-
-  // useEffect(() => {
-  //   if (audioRef.current) {
-  //     audioRef.current.pause()
-  //     audioRef.current.load()
-  //     if (isPlaying) {
-  //       audioRef.current.play()
-  //     }
-  //   }
-  // }, [currentIndex, isPlaying])
 
   const handlePrevious = () => {
     onChange(items[(value - 1 + items.length) % items.length].timestamp)

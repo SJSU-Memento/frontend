@@ -36,25 +36,24 @@ export function CameraCaptureComponent() {
   }, [getCameras, isStreaming])
 
   const [watchLocation, setWatchLocation] = useState(false)
-  // const geoLocation = useRef<GeolocationPosition | null>(null)
   const [geoLocation, setGeoLocation] = useState<GeolocationPosition | null>(null)
 
   useEffect(() => {
     if (watchLocation) {
-      const watchId = navigator.geolocation.watchPosition((position) => {
-        // geoLocation.current = position
-        setGeoLocation(position)
-      },
-        // (err) => {
-        //   setWatchLocation(false)
-        //   geoLocation.current = null
-        //   console.error("Error watching location", err)
-        //   toast({
-        //     title: "Location Error",
-        //     description: "Unable to get location. Please check your permissions.",
-        //     variant: "destructive",
-        //   })
-        // }
+      const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          setGeoLocation(position)
+        },
+        (err) => {
+          setWatchLocation(false)
+          setGeoLocation(null)
+          console.error("Error watching location", err)
+          toast({
+            title: "Location Error",
+            description: "Unable to get location. Please check your permissions.",
+            variant: "destructive",
+          })
+        }
       )
 
       console.log("Watching location", watchId)
@@ -89,13 +88,14 @@ export function CameraCaptureComponent() {
       if (!geoLocation) {
         navigator.geolocation.getCurrentPosition(function () { }, function () { }, {});
 
-        const position = await new Promise((resolve, reject) => {
+        const position: GeolocationPosition = await new Promise((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, {
             enableHighAccuracy: true,
             timeout: 5000,
             maximumAge: 0
           })
         })
+
         setGeoLocation(position)
       }
 
@@ -116,7 +116,7 @@ export function CameraCaptureComponent() {
         variant: "destructive",
       })
     }
-  }, [cameras, currentCameraIndex, toast])
+  }, [cameras, currentCameraIndex, toast, geoLocation])
 
   const switchCamera = useCallback(async () => {
     if (cameras.length < 2) {
@@ -226,7 +226,6 @@ export function CameraCaptureComponent() {
     setIsCapturing(!isCapturing);
   };
   return (
-    // <Card className="w-full max-w-md mx-auto">
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex justify-between items-center">

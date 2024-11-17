@@ -11,7 +11,6 @@ import FilterSection from "@/components/FilterSection";
 import RecentFiltersDropdownComponent from "@/components/recent-filters-dropdown";
 import { getProducer } from "@/components/helpers";
 import { useNavigate } from "react-router-dom";
-import { DateTime } from "luxon";
 
 export default function SearchPage() {
   const navigate = useNavigate()
@@ -59,7 +58,6 @@ export default function SearchPage() {
       if (producer) {
         const date = producer();
         paramObject.start = date.toUTC().toISO().slice(0, -1);
-        // paramObject.start = date.toISO();
       }
     }
     else if (filterByDate && date?.from && date?.to) {

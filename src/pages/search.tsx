@@ -8,12 +8,18 @@ import { addDays } from "date-fns";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { MapSelectorComponent } from "@/components/map-selector";
 import FilterSection from "@/components/FilterSection";
+import RecentFiltersDropdownComponent from "@/components/recent-filters-dropdown";
+import { getProducer } from "@/components/helpers";
 import { useNavigate } from "react-router-dom";
+import { DateTime } from "luxon";
 
 export default function SearchPage() {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+
+  const [filterByRecent, setFilterByRecent] = useState(false);
+  const [recentFilter, setRecentFilter] = useState('30m');
 
   const [filterByDate, setFilterByDate] = useState(false);
   const [date, setDate] = useState<DateRange | undefined>({
@@ -48,7 +54,15 @@ export default function SearchPage() {
       radius?: string;
     } = { query };
 
-    if (filterByDate && date?.from && date?.to) {
+    if (filterByRecent) {
+      const producer = getProducer(recentFilter);
+      if (producer) {
+        const date = producer();
+        paramObject.start = date.toUTC().toISO().slice(0, -1);
+        // paramObject.start = date.toISO();
+      }
+    }
+    else if (filterByDate && date?.from && date?.to) {
       paramObject.start = date.from.toISOString();
       paramObject.end = date.to.toISOString();
     }
@@ -69,7 +83,10 @@ export default function SearchPage() {
     <div className="w-full p-4 space-y-4">
       <h1 className="text-2xl font-bold">Search Memories</h1>
 
-      <div className="flex space-x-2">
+      <form className="flex space-x-2" onSubmit={(e) => {
+        e.preventDefault();
+        handleSearch()
+      }}>
         <Input
           placeholder="Search your memories..."
           className="flex-grow"
@@ -80,7 +97,7 @@ export default function SearchPage() {
           <Search className="h-4 w-4 mr-2" />
           Search
         </Button>
-      </div>
+      </form>
 
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
@@ -90,6 +107,14 @@ export default function SearchPage() {
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className="space-y-4 mt-4">
+          <FilterSection
+            label="Recent"
+            filterBy={filterByRecent}
+            setFilterBy={setFilterByRecent}
+            content={
+              <RecentFiltersDropdownComponent value={recentFilter} onChange={setRecentFilter} />
+            } />
+
           <FilterSection
             label="Date Range"
             filterBy={filterByDate}
@@ -114,10 +139,10 @@ export default function SearchPage() {
 
       <div className="grid gap-4">
         {memories.map((memory) => (
-          <div key={memory.id} className="border rounded-md p-4 bg-gray-100" onClick={() => {
+          <div key={memory.id} className="border h-64 rounded-md p-4 bg-gray-100 w-full" onClick={() => {
             navigate(`/timeline/?timestamp=${encodeURIComponent(memory.timestamp)}`);
           }}>
-            <img src={memory.image_path} className="w-full h-48 object-cover rounded-md" />
+            <img src={memory.image_path} className="h-full w-max-full m-auto rounded-md" />
           </div>
         ))}
       </div>

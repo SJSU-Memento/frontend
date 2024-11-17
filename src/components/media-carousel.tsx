@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ChevronLeft, ChevronRight, Play, Pause, ChevronDown, ChevronUp } from 'lucide-react'
+import { DateTime } from 'luxon'
+
 
 export interface MediaItem {
   image_path: string;
@@ -19,19 +21,25 @@ export function MediaCarouselComponent({ items = [], value, onChange }: {
 
 
 
+  const valueRef = useRef(value);
   useEffect(() => {
-    let interval: NodeJS.Timeout
+    valueRef.current = value;
+  }, [value]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
     if (isPlaying) {
       interval = setInterval(() => {
-        if (value >= items.length - 1) {
-          setIsPlaying(false)
-          return
+        if (valueRef.current >= items.length - 1) {
+          setIsPlaying(false);
+          return;
         }
-        onChange(items[(value + 1) % items.length].timestamp)
-      }, 250)
+        // console.log('valueRef.current', valueRef.current)
+        onChange(items[valueRef.current + 1].timestamp);
+      }, 250);
     }
-    return () => clearInterval(interval)
-  }, [isPlaying, items, value, onChange])
+    return () => clearInterval(interval);
+  }, [isPlaying, items, onChange]);
 
   // useEffect(() => {
   //   if (audioRef.current) {
@@ -57,6 +65,8 @@ export function MediaCarouselComponent({ items = [], value, onChange }: {
 
   const currentItem = items[value]
 
+  console.log('currentItem', value, currentItem)
+
   if (!currentItem) {
     return (
       <p>The current item is undefined</p>
@@ -69,9 +79,10 @@ export function MediaCarouselComponent({ items = [], value, onChange }: {
         <img
           src={currentItem.image_path}
           alt={`Image ${value + 1}`}
-          className="w-full h-full object-cover"
+          className="h-full w-max-full m-auto"
         />
       </div>
+      <p>{DateTime.fromISO(currentItem.timestamp).toRelative()}</p>
 
       <div className="flex justify-center space-x-4">
         <Button onClick={handlePrevious} variant="outline" size="icon" disabled={

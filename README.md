@@ -11,6 +11,12 @@ npm install
 npm run dev
 ```
 
+To allow Caddy inside the Docker container of the backend to serve the frontend, run the following command:
+
+```bash
+npm run dev -- --host
+```
+
 ### Development Inside Docker
 
 To develop the Memento frontend inside a Docker container, follow these steps:

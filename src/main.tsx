@@ -6,6 +6,8 @@ import SearchPage from './pages/SearchPage.lazy.tsx';
 import ManualPage from './pages/ManualPage.lazy.tsx';
 import TimelinePage from './pages/TimelinePage.lazy.tsx';
 
+import './index.css'
+
 const router = createBrowserRouter([
   {
     path: "/",

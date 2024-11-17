@@ -5,6 +5,18 @@ import L from 'leaflet'
 import { Slider } from "@/components/ui/slider"
 import { Label } from "@/components/ui/label"
 
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+const DefaultIcon = L.icon({
+  iconAnchor: [12, 41],
+  iconUrl: icon,
+  shadowUrl: iconShadow
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
+
+
 // Props for our component
 interface MapSelectorProps {
   onChange: (data: { lat: number; long: number; radius: number }) => void;

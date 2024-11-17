@@ -91,7 +91,7 @@ export default function SearchPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <Button type="submit" onClick={handleSearch}>
+        <Button type="submit">
           <Search className="h-4 w-4 mr-2" />
           Search
         </Button>
